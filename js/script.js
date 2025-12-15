@@ -1,3 +1,80 @@
+(function() {
+  'use strict';
+  
+  const fixViewport = () => {
+    // Fix HTML
+    document.documentElement.style.overflowX = 'hidden';
+    document.documentElement.style.width = '100%';
+    document.documentElement.style.maxWidth = '100vw';
+    
+    // Fix Body
+    document.body.style.overflowX = 'hidden';
+    document.body.style.width = '100%';
+    document.body.style.maxWidth = '100vw';
+    document.body.style.position = 'relative';
+    
+    // Fix Sections
+    const sections = document.querySelectorAll('section');
+    sections.forEach(s => {
+      s.style.width = '100%';
+      s.style.maxWidth = '100vw';
+      s.style.overflowX = 'hidden';
+    });
+    
+    // Fix Containers
+    const containers = document.querySelectorAll('.container, .row');
+    containers.forEach(c => {
+      c.style.maxWidth = '100%';
+      c.style.overflowX = 'hidden';
+    });
+    
+    // Fix Hero
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      hero.style.width = '100%';
+      hero.style.maxWidth = '100vw';
+      hero.style.overflowX = 'hidden';
+    }
+  };
+  
+  // Run immediately
+  fixViewport();
+  
+  // Run on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixViewport);
+  }
+  
+  // Run on window load (final check)
+  window.addEventListener('load', () => {
+    fixViewport();
+    
+    // Final check for overflow elements
+    setTimeout(() => {
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach(el => {
+        if (el.scrollWidth > window.innerWidth) {
+          el.style.maxWidth = '100%';
+          el.style.overflowX = 'hidden';
+        }
+      });
+    }, 300);
+  });
+  
+  // Fix on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fixViewport, 100);
+  });
+  
+  // Fix on orientation change
+  window.addEventListener('orientationchange', () => {
+    setTimeout(fixViewport, 100);
+  });
+})();
+
+
 // ========== OPTIMIZED PRELOADER - FAST LOADING ==========
 window.addEventListener("load", function () {
   setTimeout(function () {
