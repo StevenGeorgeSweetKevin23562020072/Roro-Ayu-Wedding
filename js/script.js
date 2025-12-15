@@ -15,10 +15,10 @@ AOS.init({
   duration: isMobile ? 400 : 800, // Faster on mobile
   once: true,
   offset: isMobile ? 50 : 80,
-  disable: function() {
+  disable: function () {
     // Disable on very slow connections
     return /bot|crawler|spider/i.test(navigator.userAgent);
-  }
+  },
 });
 
 // ========== COUNTER ANIMATION - OPTIMIZED ==========
@@ -28,13 +28,13 @@ let counterAnimated = false;
 const runCounter = () => {
   if (counterAnimated) return;
   counterAnimated = true;
-  
+
   counters.forEach((counter) => {
     const target = +counter.getAttribute("data-target");
     const duration = 2000; // 2 seconds
     const increment = target / (duration / 16); // 60fps
     let current = 0;
-    
+
     const updateCounter = () => {
       current += increment;
       if (current < target) {
@@ -44,7 +44,7 @@ const runCounter = () => {
         counter.innerText = target + "+";
       }
     };
-    
+
     updateCounter();
   });
 };
@@ -70,19 +70,19 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener("click", function (e) {
     const href = this.getAttribute("href");
     if (href === "#") return;
-    
+
     e.preventDefault();
     const target = document.querySelector(href);
-    
+
     if (target) {
       const navHeight = document.querySelector(".navbar").offsetHeight;
       const targetPosition = target.offsetTop - navHeight;
-      
+
       window.scrollTo({
         top: targetPosition,
         behavior: "smooth",
       });
-      
+
       // Close mobile menu if open
       const navbarCollapse = document.querySelector(".navbar-collapse");
       if (navbarCollapse && navbarCollapse.classList.contains("show")) {
@@ -100,19 +100,19 @@ const updateNavbar = () => {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const navbar = document.querySelector(".navbar");
   const scrollTopBtn = document.getElementById("scrollTop");
-  
+
   if (scrollTop > 50) {
     navbar.classList.add("scrolled");
   } else {
     navbar.classList.remove("scrolled");
   }
-  
+
   if (scrollTop > 300) {
     scrollTopBtn.classList.add("show");
   } else {
     scrollTopBtn.classList.remove("show");
   }
-  
+
   lastScroll = scrollTop;
   ticking = false;
 };
@@ -144,14 +144,14 @@ filterBtns.forEach((btn) => {
     // Update active state
     filterBtns.forEach((b) => b.classList.remove("active"));
     this.classList.add("active");
-    
+
     const filter = this.getAttribute("data-filter");
-    
+
     // Use batch DOM updates
     requestAnimationFrame(() => {
       portfolioItems.forEach((item) => {
         const category = item.getAttribute("data-category");
-        
+
         if (filter === "all" || category === filter) {
           item.style.display = "block";
           // Trigger reflow
@@ -187,23 +187,23 @@ document.querySelectorAll(".instagram-item").forEach((item) => {
 // ========== PERFORMANCE OPTIMIZATION ==========
 // Reduce animations on low-end devices
 if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
-  document.documentElement.classList.add('reduced-motion');
+  document.documentElement.classList.add("reduced-motion");
 }
 
 // ========== PREVENT LAYOUT SHIFT ==========
 // Add min-height to sections during load
-document.addEventListener('DOMContentLoaded', function() {
-  const sections = document.querySelectorAll('section');
-  sections.forEach(section => {
+document.addEventListener("DOMContentLoaded", function () {
+  const sections = document.querySelectorAll("section");
+  sections.forEach((section) => {
     if (!section.style.minHeight) {
-      section.style.minHeight = '100vh';
+      section.style.minHeight = "100vh";
     }
   });
 });
 
 // ========== TOUCH DEVICE DETECTION ==========
-if ('ontouchstart' in window) {
-  document.body.classList.add('touch-device');
+if ("ontouchstart" in window) {
+  document.body.classList.add("touch-device");
 }
 
 // ========== DEBOUNCE FUNCTION FOR RESIZE ==========
@@ -225,25 +225,25 @@ const handleResize = debounce(() => {
   AOS.refresh();
 }, 250);
 
-window.addEventListener('resize', handleResize);
+window.addEventListener("resize", handleResize);
 
 // ========== PREFETCH IMPORTANT PAGES ==========
 // Prefetch images in viewport
-if ('IntersectionObserver' in window) {
+if ("IntersectionObserver" in window) {
   const imageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const img = entry.target;
         if (img.dataset.src) {
           img.src = img.dataset.src;
-          img.removeAttribute('data-src');
+          img.removeAttribute("data-src");
           observer.unobserve(img);
         }
       }
     });
   });
-  
-  document.querySelectorAll('img[data-src]').forEach(img => {
+
+  document.querySelectorAll("img[data-src]").forEach((img) => {
     imageObserver.observe(img);
   });
 }
@@ -261,15 +261,23 @@ if ('serviceWorker' in navigator) {
 */
 
 // ========== CONSOLE LOG - REMOVE IN PRODUCTION ==========
-console.log('%c🎨 Roro Ayu Wedding', 'color: #d4a574; font-size: 20px; font-weight: bold;');
-console.log('%cWebsite loaded successfully!', 'color: #8b7355; font-size: 12px;');
+console.log(
+  "%c🎨 Roro Ayu Wedding",
+  "color: #d4a574; font-size: 20px; font-weight: bold;"
+);
+console.log(
+  "%cWebsite loaded successfully!",
+  "color: #8b7355; font-size: 12px;"
+);
 
-
-// WhatsApp Booking
+// WhatsApp Booking (SAFE VERSION)
 const whatsappBtn = document.querySelector(".whatsapp-btn");
 
 if (whatsappBtn) {
-  whatsappBtn.addEventListener("click", function () {
+  whatsappBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation(); 
+
     const message = `Halo Roro Ayu Wedding 👋
 
 Saya tertarik menggunakan jasa make up dari Roro Ayu Wedding.
@@ -283,11 +291,10 @@ Detail acara saya:
 Mohon info ketersediaan dan paket harga ya.
 Terima kasih 😊`;
 
-    const phoneNumber = "6281252480477"; // WA Roro Ayu Wedding
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-      message
-    )}`;
+    const phoneNumber = "6281252480477";
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
-    window.open(url, "_blank");
+    // ⬇️ INI KUNCI UTAMA
+    window.location.href = url;
   });
 }
