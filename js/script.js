@@ -609,3 +609,378 @@ document.addEventListener('visibilitychange', function() {
     document.title = 'Roro Ayu Wedding - Professional MUA Jakarta';
   }
 });
+
+// ========== MOBILE SPECIFIC FIXES - TAMBAHKAN DI AKHIR SCRIPT.JS ========== //
+
+// ========== PREVENT HORIZONTAL SCROLL ON MOBILE ==========
+(function preventHorizontalScroll() {
+  function checkOverflow() {
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Check for elements causing overflow
+    document.querySelectorAll('*').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.right > window.innerWidth || rect.left < 0) {
+        el.style.maxWidth = '100%';
+        el.style.overflowX = 'hidden';
+      }
+    });
+    
+    // Ensure body doesn't overflow
+    body.style.overflowX = 'hidden';
+    html.style.overflowX = 'hidden';
+  }
+  
+  // Run on load and resize
+  window.addEventListener('load', checkOverflow);
+  window.addEventListener('resize', debounce(checkOverflow, 250));
+  
+  // Run periodically for dynamic content
+  setInterval(checkOverflow, 2000);
+})();
+
+// ========== MOBILE MENU AUTO CLOSE ==========
+(function mobileMenuAutoClose() {
+  const navLinks = document.querySelectorAll('.nav-link');
+  const navbarCollapse = document.querySelector('.navbar-collapse');
+  
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 992 && navbarCollapse) {
+        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+        if (bsCollapse) {
+          bsCollapse.hide();
+        }
+      }
+    });
+  });
+})();
+
+// ========== TOUCH SWIPE FOR TESTIMONIALS ==========
+(function testimonialSwipe() {
+  const slider = document.querySelector('.testimonial-track');
+  if (!slider) return;
+  
+  let startX = 0;
+  let isDragging = false;
+  
+  slider.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  });
+  
+  slider.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+  }, { passive: false });
+  
+  slider.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    
+    // Swipe left (next)
+    if (diff > 50) {
+      document.querySelector('.testimonial-nav.next')?.click();
+    }
+    // Swipe right (prev)
+    else if (diff < -50) {
+      document.querySelector('.testimonial-nav.prev')?.click();
+    }
+  });
+})();
+
+// ========== TOUCH SWIPE FOR LIGHTBOX ==========
+(function lightboxSwipe() {
+  const lightbox = document.getElementById('lightbox');
+  if (!lightbox) return;
+  
+  let startX = 0;
+  let isDragging = false;
+  
+  lightbox.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('lightbox-image')) {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    }
+  });
+  
+  lightbox.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+  });
+  
+  lightbox.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    
+    // Swipe left (next)
+    if (diff > 50) {
+      document.querySelector('.lightbox-next')?.click();
+    }
+    // Swipe right (prev)
+    else if (diff < -50) {
+      document.querySelector('.lightbox-prev')?.click();
+    }
+  });
+})();
+
+// ========== MOBILE VIEWPORT HEIGHT FIX (100vh issue) ==========
+(function fixMobileViewportHeight() {
+  function setVH() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  
+  setVH();
+  window.addEventListener('resize', debounce(setVH, 250));
+  window.addEventListener('orientationchange', () => {
+    setTimeout(setVH, 100);
+  });
+})();
+
+// ========== IMPROVE TOUCH TARGET SIZE ==========
+(function improveTouchTargets() {
+  if (!('ontouchstart' in window)) return;
+  
+  // Make sure all buttons are at least 44x44px (Apple guideline)
+  const buttons = document.querySelectorAll('button, a, .clickable');
+  buttons.forEach(btn => {
+    const rect = btn.getBoundingClientRect();
+    if (rect.width < 44 || rect.height < 44) {
+      btn.style.minWidth = '44px';
+      btn.style.minHeight = '44px';
+      btn.style.display = 'inline-flex';
+      btn.style.alignItems = 'center';
+      btn.style.justifyContent = 'center';
+    }
+  });
+})();
+
+// ========== LAZY LOAD IMAGES ON MOBILE ==========
+(function lazyLoadMobile() {
+  if (window.innerWidth > 768) return;
+  
+  const images = document.querySelectorAll('img[loading="lazy"]');
+  
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+          }
+          imageObserver.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: '50px' // Load images 50px before they enter viewport
+    });
+    
+    images.forEach(img => imageObserver.observe(img));
+  }
+})();
+
+// ========== PREVENT ZOOM ON INPUT FOCUS (iOS) ==========
+(function preventZoomOnFocus() {
+  if (!(/iPhone|iPad|iPod/.test(navigator.userAgent))) return;
+  
+  const inputs = document.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    // Ensure font-size is at least 16px to prevent zoom
+    const fontSize = window.getComputedStyle(input).fontSize;
+    if (parseInt(fontSize) < 16) {
+      input.style.fontSize = '16px';
+    }
+  });
+})();
+
+// ========== MOBILE SCROLL PERFORMANCE ==========
+(function improveScrollPerformance() {
+  if (window.innerWidth > 768) return;
+  
+  let scrollTimer;
+  let isScrolling = false;
+  
+  window.addEventListener('scroll', () => {
+    if (!isScrolling) {
+      isScrolling = true;
+      document.body.classList.add('is-scrolling');
+    }
+    
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      isScrolling = false;
+      document.body.classList.remove('is-scrolling');
+    }, 150);
+  }, { passive: true });
+})();
+
+// ========== FIX MODAL SCROLL LOCK ON MOBILE ==========
+(function fixModalScrollLock() {
+  const modals = [bookingModal, lightbox];
+  
+  modals.forEach(modal => {
+    if (!modal) return;
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isActive = modal.classList.contains('active');
+          
+          if (isActive) {
+            // Prevent background scroll
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${window.scrollY}px`;
+            document.body.style.width = '100%';
+          } else {
+            // Restore scroll position
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+          }
+        }
+      });
+    });
+    
+    observer.observe(modal, { attributes: true });
+  });
+})();
+
+// ========== SAFE AREA INSETS FOR NOTCH DEVICES ==========
+(function handleSafeAreaInsets() {
+  // Add padding for devices with notches (iPhone X, etc)
+  const root = document.documentElement;
+  
+  // Check if device has safe area insets
+  if (CSS.supports('padding-top: env(safe-area-inset-top)')) {
+    root.style.setProperty('--safe-area-top', 'env(safe-area-inset-top)');
+    root.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom)');
+    
+    // Apply to fixed elements
+    const navbar = document.querySelector('.navbar');
+    const whatsappFloat = document.querySelector('.whatsapp-float');
+    const scrollTop = document.querySelector('.scroll-top');
+    
+    if (navbar) {
+      navbar.style.paddingTop = 'var(--safe-area-top, 0)';
+    }
+    
+    if (whatsappFloat) {
+      whatsappFloat.style.bottom = 'calc(15px + var(--safe-area-bottom, 0))';
+    }
+    
+    if (scrollTop) {
+      scrollTop.style.bottom = 'calc(75px + var(--safe-area-bottom, 0))';
+    }
+  }
+})();
+
+// ========== HANDLE ORIENTATION CHANGE ==========
+(function handleOrientationChange() {
+  window.addEventListener('orientationchange', () => {
+    // Force reflow
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // Trigger reflow
+    document.body.style.display = '';
+    
+    // Re-calculate positions
+    setTimeout(() => {
+      if (typeof updateTestimonialSlider === 'function') {
+        updateTestimonialSlider();
+      }
+      AOS.refresh();
+    }, 300);
+  });
+})();
+
+// ========== MOBILE FORM VALIDATION FEEDBACK ==========
+(function mobileFormFeedback() {
+  const forms = document.querySelectorAll('form');
+  
+  forms.forEach(form => {
+    form.addEventListener('submit', (e) => {
+      const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+      let firstInvalid = null;
+      
+      inputs.forEach(input => {
+        if (!input.validity.valid && !firstInvalid) {
+          firstInvalid = input;
+        }
+      });
+      
+      // Scroll to first invalid field on mobile
+      if (firstInvalid && window.innerWidth < 768) {
+        e.preventDefault();
+        firstInvalid.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        firstInvalid.focus();
+      }
+    });
+  });
+})();
+
+// ========== IMPROVE TAP DELAY ==========
+(function reduceTapDelay() {
+  if (!('ontouchstart' in window)) return;
+  
+  // Add CSS to reduce tap delay
+  const style = document.createElement('style');
+  style.textContent = `
+    a, button, input, select, textarea, [role="button"] {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(212, 165, 116, 0.3);
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ========== DETECT SLOW CONNECTION ==========
+(function detectSlowConnection() {
+  if ('connection' in navigator) {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    
+    if (connection) {
+      // If slow connection, reduce animations
+      if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+        document.body.classList.add('slow-connection');
+        
+        // Disable heavy animations
+        const style = document.createElement('style');
+        style.textContent = `
+          .slow-connection * {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+  }
+})();
+
+// ========== MOBILE CONSOLE LOG ==========
+if (window.innerWidth < 768) {
+  console.log(
+    "%c📱 Mobile Optimizations Active",
+    "color: #d4a574; font-size: 14px; font-weight: bold;"
+  );
+  console.log(
+    "%c✅ Touch gestures enabled\n✅ Viewport fixes applied\n✅ Performance optimized",
+    "color: #8b7355; font-size: 11px;"
+  );
+}
+
+// ========== END OF MOBILE FIXES ========== //
+
